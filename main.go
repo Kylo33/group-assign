@@ -29,22 +29,30 @@ func main() {
 	if err != nil {
 		log.Fatalf("Invalid problem count: %v", err)
 	}
+	problems := make([]int, problemCount)
+	for i := range problems {
+		problems[i] = i + 1
+	}
 
 	names := strings.Split(os.Args[2], ",")
 	slices.Sort(names)
 
-	var members []groupMember
+	var members []*groupMember
 	for _, name := range names {
-		members = append(members, groupMember{name: name})
+		members = append(members, &groupMember{name: name})
 	}
 
-	// People, problems, and coverage
-	matches := match.Random(problemCount, len(members), coverage)
+	matches, err := match.Fair(problems, members, coverage)
+	if err != nil {
+		log.Fatalf("Error matching group members: %v", err)
+	}
+
 	for _, m := range matches {
-		members[m.RightIndex].problems = append(members[m.RightIndex].problems, m.LeftIndex + 1)
+		for _, memberPtr := range m.To {
+			memberPtr.problems = append(memberPtr.problems, m.From)
+		}
 	}
 
-	// Print assignments
 	for _, member := range members {
 		fmt.Printf("%v: %v\n", member.name, member.problems)
 	}
