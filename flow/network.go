@@ -8,7 +8,9 @@ const Sink = -1
 const sourceSinkShift = 2
 
 type Graph struct {
-	adj [][]Edge
+	numVerticies int
+	outgoing [][]*Edge
+	incoming [][]*Edge
 }
 
 type Edge struct {
@@ -20,7 +22,9 @@ type Edge struct {
 
 func NewGraph(numVertices int) Graph {
 	return Graph{
-		adj: make([][]Edge, numVertices + sourceSinkShift),
+		numVerticies: numVertices,
+		outgoing: make([][]*Edge, numVertices + sourceSinkShift),
+		incoming: make([][]*Edge, numVertices + sourceSinkShift),
 	}
 }
 
@@ -31,10 +35,14 @@ func (g *Graph) AddEdge(src, dst, capacity int) {
 		Capacity: capacity,
 	}
 
-	g.adj[src + sourceSinkShift] = append(g.adj[src + sourceSinkShift], newEdge)
+	g.outgoing[src + sourceSinkShift] = append(g.outgoing[src + sourceSinkShift], &newEdge)
 }
 
-func (g *Graph) IncidentEdges(vertex int) []Edge {
-	return g.adj[vertex + sourceSinkShift]
+func (g *Graph) IncomingEdges(vertex int) []*Edge {
+	return g.incoming[vertex + sourceSinkShift]
+}
+
+func (g *Graph) OutgoingEdges(vertex int) []*Edge {
+	return g.outgoing[vertex + sourceSinkShift]
 }
 

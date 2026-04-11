@@ -43,7 +43,7 @@ func Fair[L any, R any](left []L, right []R, coverage int) ([]Match[L, R], error
 	for leftIndex, leftThing := range left {
 		match := Match[L, R]{From: leftThing}
 
-		for _, edge := range graph.IncidentEdges(leftIndex) {
+		for _, edge := range graph.OutgoingEdges(leftIndex) {
 			if edge.Dst == flow.Source {
 				continue
 			}
