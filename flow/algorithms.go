@@ -2,6 +2,7 @@ package flow
 
 import (
 	"math"
+	"math/rand"
 )
 
 func (g *Graph) MaxFlow() {
@@ -13,6 +14,12 @@ func (g *Graph) MaxFlow() {
 	}
 }
 
+type flowCandidate struct {
+	incoming  bool
+	potential int
+	edge      *Edge
+}
+
 func maxFlowDfs(g *Graph, node, minFlow int, seen []bool) int {
 	if seen[node+sourceSinkShift] {
 		return -1
@@ -22,33 +29,47 @@ func maxFlowDfs(g *Graph, node, minFlow int, seen []bool) int {
 	if node == Sink {
 		return minFlow
 	}
-	
-	for _, edge := range g.OutgoingEdges(node) {
-		potential := edge.Capacity - edge.Flow
-		if potential > 0 {
-			augmentBy := maxFlowDfs(g, edge.Dst, min(minFlow, potential), seen)
-			if augmentBy < 0 {
-				continue
-			}
 
-			edge.Flow += augmentBy
-			return augmentBy
+	candidates := findFlowCandidates(g, node)
+
+	rand.Shuffle(
+		len(candidates),
+		func(i, j int) { candidates[i], candidates[j] = candidates[j], candidates[i] },
+	)
+
+	for _, candidate := range candidates {
+		if candidate.potential <= 0 {
+			continue
 		}
-	}
 
-	for _, edge := range g.IncomingEdges(node) {
-		potential := edge.Flow
-
-		if potential > 0 {
-			augmentBy := maxFlowDfs(g, edge.Dst, min(minFlow, potential), seen)
-			if augmentBy < 0 {
-				continue
-			}
-
-			edge.Flow -= augmentBy
-			return augmentBy
+		augmentBy := maxFlowDfs(g, candidate.edge.Dst, min(minFlow, candidate.potential), seen)
+		if augmentBy < 0 {
+			continue
 		}
+
+		if candidate.incoming {
+			candidate.edge.Flow -= augmentBy
+		} else {
+			candidate.edge.Flow += augmentBy
+		}
+		return augmentBy
 	}
 
 	return -1
 }
+
+func findFlowCandidates(g *Graph, node int) []flowCandidate {
+	var candidates []flowCandidate
+
+	for _, edge := range g.OutgoingEdges(node) {
+		potential := edge.Capacity - edge.Flow
+		candidates = append(candidates, flowCandidate{incoming: false, potential: potential, edge: edge})
+	}
+
+	for _, edge := range g.IncomingEdges(node) {
+		potential := edge.Flow
+		candidates = append(candidates, flowCandidate{incoming: true, potential: potential, edge: edge})
+	}
+	return candidates
+}
+

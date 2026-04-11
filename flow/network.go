@@ -36,6 +36,7 @@ func (g *Graph) AddEdge(src, dst, capacity int) {
 	}
 
 	g.outgoing[src + sourceSinkShift] = append(g.outgoing[src + sourceSinkShift], &newEdge)
+	g.incoming[dst + sourceSinkShift] = append(g.incoming[dst + sourceSinkShift], &newEdge)
 }
 
 func (g *Graph) IncomingEdges(vertex int) []*Edge {

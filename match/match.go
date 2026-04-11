@@ -25,17 +25,22 @@ func Fair[L any, R any](left []L, right []R, coverage int) ([]Match[L, R], error
 		}
 	}
 
-	// Enforce the constraint that nobody can solve more than one
-	// more problem than anyone else.
+	// Two passes.
+	// 1. allowedRight = ⌊leftCount * coverage / rightCount⌋, run max flow
+	// 2. allowedRight = ⌈leftCount * coverage / rightCount⌉, run max flow
 
-	// allowedRight = ⌈leftCount * coverage / rightCount⌉
-	allowedRight := (len(left)*coverage + len(right) - 1) / len(right)
-
+	// First pass
+	allowedRight := (len(left)*coverage) / len(right)
 	for rightIndex := range right {
 		graph.AddEdge(len(left)+rightIndex, flow.Sink, allowedRight)
 	}
+	graph.MaxFlow()
 
-	// Run Max Flow
+	// Second pass
+	allowedRight = (len(left)*coverage + len(right) - 1) / len(right)
+	for _, edge := range graph.IncomingEdges(flow.Sink) {
+		edge.Capacity = allowedRight
+	}
 	graph.MaxFlow()
 	
 	// Find the matches
