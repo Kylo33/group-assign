@@ -11,7 +11,7 @@ type Match[L any, R any] struct {
 	To   []R
 }
 
-func Fair[L any, R any](left []L, right []R, coverage int) ([]Match[L, R], error) {
+func Fair[L any, R any](left []L, right []R, coverage int) []Match[L, R] {
 	if coverage > len(right) {
 		log.Fatalf("Coverage is larger than items that can be assigned toa")
 	}
@@ -61,5 +61,5 @@ func Fair[L any, R any](left []L, right []R, coverage int) ([]Match[L, R], error
 		matches = append(matches, match)
 	}
 
-	return matches, nil
+	return matches
 }

@@ -1,59 +1,51 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"log"
 	"os"
-	"slices"
-	"strconv"
 	"strings"
 
 	"github.com/Kylo33/group-assign/match"
 )
 
-// Every problem should be solved by two people.
-const coverage = 2
-
-type groupMember struct {
-	name     string
-	problems []int
-}
+var coverage = flag.Int("coverage", 2, "number of people per problem")
+var people = flag.String("people", "", "comma separated list of group members")
+var problems = flag.Int("problems", 0, "number of problems to assign")
 
 func main() {
-	// TODO: Clean up input, consider Bubbletea/huh, pflags, and/or Cobra
-	if len(os.Args) != 3 {
-		log.Fatalf("Usage: %v <problem count> <group members>", os.Args[0])
+	flag.Parse()
+
+	if *people == "" {
+		fmt.Println("Error: the -people flag is required")
+		flag.Usage()
+		os.Exit(1)
 	}
 
-	problemCount, err := strconv.Atoi(os.Args[1])
-	if err != nil {
-		log.Fatalf("Invalid problem count: %v", err)
-	}
-	problems := make([]int, problemCount)
-	for i := range problems {
-		problems[i] = i + 1
+	if *problems <= 0 {
+		fmt.Println("Error: the -problems flag is required")
+		flag.Usage()
+		os.Exit(1)
 	}
 
-	names := strings.Split(os.Args[2], ",")
-	slices.Sort(names)
+	names := strings.Split(*people, ",")
+	for i := range names {
+		names[i] = strings.TrimSpace(names[i])
+	}
+	assignments := make(map[string][]int)
 
-	var members []*groupMember
-	for _, name := range names {
-		members = append(members, &groupMember{name: name})
+	problemList := make([]int, *problems)
+	for i := range problemList {
+		problemList[i] = i + 1
 	}
 
-	matches, err := match.Fair(problems, members, coverage)
-	if err != nil {
-		log.Fatalf("Error matching group members: %v", err)
-	}
-
-	for _, m := range matches {
-		for _, memberPtr := range m.To {
-			memberPtr.problems = append(memberPtr.problems, m.From)
+	matches := match.Fair(problemList, names, *coverage)
+	for _, match := range matches {
+		for _, name := range match.To {
+			assignments[name] = append(assignments[name], match.From)
 		}
 	}
-
-	for _, member := range members {
-		fmt.Printf("%v: %v\n", member.name, member.problems)
+	for name, problems := range assignments {
+		fmt.Printf("%v: %v\n", name, problems)
 	}
 }
