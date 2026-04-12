@@ -37,8 +37,8 @@ Usage of group-assign:
 ```
 $ group-assign -problems=5 -people=Alice,Bob,Charlie,David
 
-Alice: [3 4 5]
-Charlie: [1 4]
-David: [1 2 3]
+Alice: [1 5]
 Bob: [2 5]
+Charlie: [2 3 4]
+David: [1 3 4]
 ```

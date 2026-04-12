@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/Kylo33/group-assign/match"
@@ -32,6 +33,7 @@ func main() {
 	for i := range names {
 		names[i] = strings.TrimSpace(names[i])
 	}
+	slices.Sort(names)
 	assignments := make(map[string][]int)
 
 	problemList := make([]int, *problems)
@@ -45,7 +47,8 @@ func main() {
 			assignments[name] = append(assignments[name], match.From)
 		}
 	}
-	for name, problems := range assignments {
+	for _, name := range names {
+		problems := assignments[name]
 		fmt.Printf("%v: %v\n", name, problems)
 	}
 }
