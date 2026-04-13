@@ -5,7 +5,7 @@ import (
 	"math/rand"
 )
 
-func (g *Graph) MaxFlow() {
+func (g *Graph) RandomMaxFlow() {
 	for {
 		seen := make([]bool, g.numVerticies+sourceSinkShift)
 		if maxFlowDfs(g, Source, math.MaxInt, seen) < 0 {
@@ -42,7 +42,15 @@ func maxFlowDfs(g *Graph, node, minFlow int, seen []bool) int {
 			continue
 		}
 
-		augmentBy := maxFlowDfs(g, candidate.edge.Dst, min(minFlow, candidate.potential), seen)
+		var nextNode int
+		if candidate.incoming {
+			nextNode = candidate.edge.Src
+		} else {
+			nextNode = candidate.edge.Dst
+		}
+
+		augmentBy := maxFlowDfs(g, nextNode, min(minFlow, candidate.potential), seen)
+
 		if augmentBy < 0 {
 			continue
 		}
