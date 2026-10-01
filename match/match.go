@@ -14,7 +14,7 @@ type Match[L any, R any] struct {
 
 func Fair[L any, R any](left []L, right []R, coverage int) []Match[L, R] {
 	if coverage > len(right) {
-		log.Fatalf("Coverage is larger than items that can be assigned toa")
+		log.Fatalf("Coverage is larger than items that can be assigned to")
 	}
 
 	graph := flow.NewGraph(len(left) + len(right))
